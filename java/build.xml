@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project name='Hive UDFs' default='build'>
+
+    <property environment="env"/>
+    <!-- JAR PATHS -->
+    <path id='dependencies'>
+        <fileset dir='/usr/lib/hive/lib'>
+            <include name='hive-exec.jar'/>
+        </fileset>
+    </path>
+
+    <!-- CLASSPATHS -->
+    <path id='compile.classpath'>
+        <path refid='dependencies'/>
+    </path>
+
+    <path id='runtime.classpath'>
+        <fileset dir='build/jars'>
+            <include name='*.jar'/>
+        </fileset>
+        <path refid='compile.classpath'/>
+    </path>
+
+    <!-- BUILD TARGETS -->
+    <target name='clean'>
+        <delete dir='build'/>
+        <delete dir='lib'/>
+    </target>
+
+    <target name='build' depends='clean'>
+        <mkdir dir='build/classes'/>
+        <mkdir dir='build/jars'/>
+
+        <javac srcdir='src' destdir='build/classes' debug='true' debuglevel='lines,source,vars'>
+            <classpath>
+                <path refid='compile.classpath'/>
+            </classpath>
+        </javac>
+
+        <jar basedir='build/classes' destfile='build/jars/udfs.jar'/>
+        <copy file='build/jars/udfs.jar' todir='lib'/>
+    </target>
+
+    <!-- RUN TARGETS -->
+    <target name='test' depends='build'>
+        <java classname='com.grooveshark.hive.udf.Test' fork='true'>
+            <classpath>
+                <path refid='runtime.classpath'/>
+            </classpath>
+        </java>
+    </target>
+</project>
